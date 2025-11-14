@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HyperRocks</title>
+  <meta name="description" content="1111 Unique HyperRocks • On Drip.Trade" />
   <style>
     :root {
       --bg: #0f0f1a;
@@ -17,80 +18,11 @@
       background: var(--bg);
       color: var(--text);
       font-family: 'Courier New', monospace;
-      text-align: center;
-      padding: 20px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
       overflow-x: hidden;
-    }
-    .logo {
-      width: 100px;
-      height: 100px;
-      margin: 20px auto;
-      filter: drop-shadow(0 0 20px var(--accent));
-      animation: float 6s infinite ease-in-out;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-    }
-    h1 {
-      font-size: 3em;
-      color: var(--accent);
-      text-shadow: var(--glow);
-      margin: 10px 0 5px;
-    }
-    .tagline {
-      font-size: 1.2em;
-      color: #88aaff;
-      margin-bottom: 30px;
-    }
-    .eyeframe {
-      width: 100%;
-      max-width: 1000px;
-      height: 600px;
-      background: var(--card);
-      border: 2px solid var(--accent);
-      border-radius: 20px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: var(--glow);
-      margin: 30px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .eyeframe-canvas {
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at center, #1a1a2e, #0f0f1a);
-      padding: 20px;
-      box-sizing: border-box;
-      overflow: auto;
-    }
-    .eyeframe iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 16px;
-    }
-    .loading {
-      color: var(--accent);
-      font-size: 1.3em;
-      margin: 40px 0;
-      animation: blink 1.5s infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-    footer {
-      margin-top: 50px;
-      font-size: 0.85em;
-      color: #667;
     }
     .particle-bg {
       position: fixed;
@@ -104,21 +36,81 @@
       background: var(--accent);
       border-radius: 50%;
       opacity: 0;
-      animation: twinkle 5s infinite;
+      animation: twinkle 4s infinite;
     }
     @keyframes twinkle {
       0%, 100% { opacity: 0; }
-      50% { opacity: 0.8; }
+      50% { opacity: 0.9; }
+    }
+    .logo {
+      font-size: 100px;
+      margin: 30px auto;
+      filter: drop-shadow(0 0 20px var(--accent));
+      animation: float 6s infinite ease-in-out;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    h1 {
+      font-size: 3.5em;
+      color: var(--accent);
+      text-shadow: var(--glow);
+      margin: 10px 0;
+    }
+    .tagline {
+      font-size: 1.3em;
+      color: #88aaff;
+      margin-bottom: 40px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px;
+      padding: 20px;
+      max-width: 1400px;
+      width: 100%;
+    }
+    .rock {
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      box-shadow: var(--glow);
+      transition: all 0.4s ease;
+      background: var(--card);
+    }
+    .rock img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 10px;
+      transition: transform 0.4s ease;
+    }
+    .rock:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 0 50px rgba(0, 212, 255, 0.9);
+    }
+    .rock:hover img {
+      transform: scale(1.15);
     }
     .contract-link {
       color: var(--accent);
       text-decoration: none;
-      font-size: 0.9em;
-      margin-top: 20px;
+      font-size: 1em;
+      margin: 40px 0 20px;
       display: inline-block;
-    }
-    .contract-link:hover {
       text-shadow: var(--glow);
+    }
+    .contract-link:hover { text-shadow: 0 0 35px rgba(0, 212, 255, 1); }
+    footer {
+      margin: 40px 0 20px;
+      font-size: 0.9em;
+      color: #667;
+    }
+    @media (max-width: 600px) {
+      .gallery { grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 15px; }
+      h1 { font-size: 2.8em; }
     }
   </style>
 </head>
@@ -126,48 +118,62 @@
 
   <div class="particle-bg" id="stars"></div>
 
-  <!-- Floating Rock Logo -->
-  <div class="logo">🪨</div>
-
+  <div class="logo">Rock</div>
   <h1>HyperRocks</h1>
-  <p class="tagline">Tiny 1111 HyperRocks</p>
+  <p class="tagline">1111 Unique HyperRocks • Live on Drip.Trade</p>
 
-  <div class="loading" id="loading">Loading Drip.Trade...</div>
-
-  <!-- EYEFROME WITH IFRAME -->
-  <div class="eyeframe">
-    <div class="eyeframe-canvas" id="eyeframe">
-      <iframe src="https://drip.trade/collections/hyperrocks" title="HyperRocks Collection" loading="lazy"></iframe>
-    </div>
-  </div>
+  <!-- GALLERY OF HYPERROCKS -->
+  <div class="gallery" id="gallery"></div>
 
   <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">
     View Contract on HyperEVMScan
   </a>
 
-  <footer>HyperRocks • 1111 Unique • On Drip.Trade</footer>
+  <footer>HyperRocks • Supply 1111 • Built on HyperEVM</footer>
 
   <script>
-    // === PARTICLES ===
-    function createStars() {
-      const starsEl = document.getElementById('stars');
-      for (let i = 0; i < 80; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 5 + 's';
-        starsEl.appendChild(star);
+    // Twinkling background stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 4 + 's';
+      starsContainer.appendChild(star);
+    }
+
+    // Load some featured + random HyperRocks
+    const gallery = document.getElementById('gallery');
+    const featured = [1, 69, 420, 777, 999, 1111]; // always show these
+    const total = 1111;
+    const extra = 30; // total rocks shown = featured + extra random
+
+    // Add featured first
+    featured.forEach(id => addRock(id));
+
+    // Add random ones (no duplicates)
+    const used = new Set(featured);
+    while (used.size < featured.length + extra) {
+      const randomId = Math.floor(Math.random() * total) + 1;
+      if (!used.has(randomId)) {
+        used.add(randomId);
+        addRock(randomId);
       }
     }
 
-    // === INIT ===
-    createStars();
-    document.getElementById('loading').style.display = 'none';
-  </script>
+    function addRock(id) {
+      const div = document.createElement('div');
+      div.className = 'rock';
 
+      const img = document.createElement('img');
+      img.src = `https://drip.trade/token/hyperrocks/${id}.svg`;
+      img.alt = `HyperRock #${id}`;
+      img.loading = "lazy";
+
+      div.appendChild(img);
+      gallery.appendChild(div);
+    }
+  </script>
 </body>
 </html>
-
-
-
