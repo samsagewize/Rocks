@@ -116,6 +116,7 @@
       font-size: 0.8em;
       color: var(--accent);
       text-shadow: 0 0 5px rgba(0, 212, 255, 0.8);
+      z-index: 1;
     }
     .loading-more {
       grid-column: 1 / -1;
@@ -185,6 +186,7 @@
     }
 
     // Gallery config
+    const CONTRACT = '0x4cf79252ea6861c4338284e1a1f724d4e7ef667b';
     const TOTAL = 1111;
     const BATCH_SIZE = 50;
     let loadedIds = new Set();
@@ -205,10 +207,14 @@
       div.dataset.id = id;
 
       const img = document.createElement('img');
-      img.src = `https://drip.trade/token/hyperrocks/${id}.svg`;
+      img.src = `https://drip.trade/a/${CONTRACT}/${id}/image.svg`;
       img.alt = `HyperRock #${id}`;
       img.loading = "lazy";
-      img.onerror = () => { console.warn(`Failed to load #${id}`); }; // Graceful fail
+      img.onerror = () => { 
+        console.warn(`Failed to load #${id}`); 
+        // Fallback: Try original pattern as backup
+        img.src = `https://drip.trade/token/hyperrocks/${id}.svg`;
+      };
 
       div.appendChild(img);
       gallery.appendChild(div);
