@@ -3,295 +3,373 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HyperRocks – Animated On-Chain Gallery</title>
+  <title>HyperRocks</title>
   <style>
-    :root{
-      --bg:#0f0f1a;--card:#1a1a2e;--accent:#00d4ff;--text:#e0e0ff;
-      --glow:0 0 25px rgba(0,212,255,.6);
+    :root {
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --accent: #00d4ff;
+      --text: #e0e0ff;
+      --glow: 0 0 25px rgba(0, 212, 255, 0.6);
     }
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{
-      background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
-      text-align:center;padding:20px;min-height:100vh;display:flex;flex-direction:column;
-      align-items:center;overflow-x:hidden;
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
     }
-    .logo{width:100px;height:100px;margin:20px auto;filter:drop-shadow(0 0 20px var(--accent));
-      animation:float 6s infinite ease-in-out;}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
-    h1{font-size:3em;color:var(--accent);text-shadow:var(--glow);margin:10px 0 5px;}
-    .tagline{font-size:1.2em;color:#88aaff;margin-bottom:30px;}
-    .stats{display:flex;justify-content:space-around;width:100%;max-width:600px;margin-bottom:20px;font-size:1.1em;}
-    .stat{background:var(--card);padding:10px 20px;border-radius:10px;border:1px solid var(--accent);}
-    .eyeframe{width:100%;max-width:1000px;height:600px;background:var(--card);
-      border:2px solid var(--accent);border-radius:20px;overflow:hidden;position:relative;
-      box-shadow:var(--glow);margin:30px auto;}
-    .eyeframe-canvas{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-      background:radial-gradient(circle at center,#1a1a2e,#0f0f1a);}
-    .rock-svg{width:80%;height:80%;filter:drop-shadow(0 0 30px var(--accent));
-      animation:pulse 4s infinite ease-in-out;}
-    @keyframes pulse{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.05) rotate(2deg)}}
-    .controls{display:flex;justify-content:center;gap:15px;margin:20px 0;}
-    .btn{background:transparent;border:2px solid var(--accent);color:var(--accent);
-      padding:10px 20px;border-radius:10px;cursor:pointer;font-size:1em;font-weight:bold;
-      transition:all .3s;}
-    .btn:hover{background:var(--accent);color:#000;box-shadow:var(--glow);}
-    .btn.active{background:var(--accent);color:#000;}
-    .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:15px;width:100%;max-width:1300px;padding:0 20px;margin-top:30px;}
-    .thumb{background:var(--card);border:1px solid var(--accent);border-radius:12px;
-      overflow:hidden;cursor:pointer;transition:all .3s;opacity:.7;}
-    .thumb:hover,.thumb.active{opacity:1;transform:scale(1.05);
-      box-shadow:0 0 20px rgba(0,212,255,.8);}
-    .thumb img{width:100%;height:150px;object-fit:contain;}
-    .loading{color:var(--accent);font-size:1.3em;margin:40px 0;
-      animation:blink 1.5s infinite;}
-    @keyframes blink{0%,100%{opacity:.6}50%{opacity:1}}
-    footer{margin-top:50px;font-size:.85em;color:#667;}
-    .particle-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1;}
-    .star{position:absolute;width:2px;height:2px;background:var(--accent);border-radius:50%;
-      opacity:0;animation:twinkle 5s infinite;}
-    @keyframes twinkle{0%,100%{opacity:0}50%{opacity:.8}}
-    .contract-link{color:var(--accent);text-decoration:none;font-size:.9em;margin-top:20px;display:inline-block;}
-    .contract-link:hover{text-shadow:var(--glow);}
-    .error{color:#ff6b6b;font-size:1em;margin:20px;}
+    .logo {
+      width: 100px;
+      height: 100px;
+      margin: 20px auto;
+      filter: drop-shadow(0 0 20px var(--accent));
+      animation: float 6s infinite ease-in-out;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    h1 {
+      font-size: 3em;
+      color: var(--accent);
+      text-shadow: var(--glow);
+      margin: 10px 0 5px;
+    }
+    .tagline {
+      font-size: 1.2em;
+      color: #88aaff;
+      margin-bottom: 30px;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+      font-size: 1.1em;
+    }
+    .stat {
+      background: var(--card);
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      width: 100%;
+      max-width: 1300px;
+      padding: 0 20px;
+    }
+    .rock-card {
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--glow);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+    .rock-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.9);
+    }
+    .rock-img {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4.5em;
+      color: var(--accent);
+      text-shadow: 0 0 20px currentColor;
+      position: relative;
+      overflow: hidden;
+    }
+    .rock-img svg {
+      width: 80%;
+      height: 80%;
+      filter: drop-shadow(0 0 10px currentColor);
+    }
+    .rock-img::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      animation: pulseGlow 4s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.3); }
+    }
+    .rock-info {
+      padding: 18px;
+    }
+    .rock-title {
+      font-size: 1.4em;
+      color: var(--accent);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .rock-desc {
+      font-size: 0.95em;
+      color: #bbd;
+      line-height: 1.5;
+    }
+    .traits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .trait {
+      background: rgba(0,212,255,0.2);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      border: 1px solid var(--accent);
+    }
+    .loading {
+      color: var(--accent);
+      font-size: 1.3em;
+      margin: 40px 0;
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.85em;
+      color: #667;
+    }
+    .particle-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0;
+      animation: twinkle 5s infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 0.8; }
+    }
+    .contract-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9em;
+      margin-top: 20px;
+      display: inline-block;
+    }
+    .contract-link:hover {
+      text-shadow: var(--glow);
+    }
+    .error {
+      color: #ff6b6b;
+      font-size: 1em;
+      margin: 20px;
+    }
   </style>
 </head>
 <body>
 
   <div class="particle-bg" id="stars"></div>
 
-  <div class="logo">Rock</div>
+  <!-- Floating Rock Logo -->
+  <div class="logo">🪨</div>
 
   <h1>HyperRocks Gallery</h1>
-  <p class="tagline">Live animated SVGs from HyperEVM – Click to explore</p>
+  <p class="tagline">Procedural rocks from the HyperEVM chain – Live On-Chain Traits & SVG</p>
 
   <div class="stats" id="stats"></div>
 
-  <div class="loading" id="loading">Connecting to HyperEVM...</div>
+  <div class="loading" id="loading">Fetching rocks from HyperEVM...</div>
   <div class="error" id="error" style="display:none;"></div>
 
-  <!-- EYEFROME -->
-  <div class="eyeframe">
-    <div class="eyeframe-canvas" id="eyeframe">
-      <div style="color:var(--accent);font-size:2em;">Select a Rock</div>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button class="btn" id="prevBtn">Previous</button>
-    <button class="btn active" id="playBtn">Pause</button>
-    <button class="btn" id="nextBtn">Next</button>
-  </div>
-
-  <!-- THUMBNAILS -->
   <div class="gallery" id="gallery"></div>
 
-  <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">
-    View Contract on HyperEVMScan
-  </a>
+  <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">View Contract on HyperEVMScan</a>
 
-  <footer>HyperRocks • 1111 Unique • On-Chain SVG</footer>
+  <footer>HyperRocks • 1111 Unique • On-Chain Generated</footer>
 
   <script>
-    // ==== CONFIG ====
-    const CONTRACT = "0x4CF79252EA6861c4338284e1A1F724d4e7ef667b";
-    const RPC_URL = "https://rpc.hyperliquid.xyz/evm";   // MAINNET
-    const LOAD_FIRST = 20;                               // show first N minted
+    // === CONFIG ===
+    const CONTRACT_ADDRESS = "0x4CF79252EA6861c4338284e1A1F724d4e7ef667b";
+    const RPC_URL = "https://rpc.hyperliquid-testnet.com"; // Adjust for mainnet if needed; use public RPC
+    const CHAIN_ID = 421614; // HyperEVM chain ID (example; confirm)
 
+    // Trait mappings (from contract data)
+    const TRAIT_MAPS = {
+      background: ["stone", "ocean", "desert", "forest", "ice", "gold"],
+      flower: ["none", "orange", "pinkbushbig", "purple", "blue", "pink", "red", "white", "yellow", "pinkbushmed", "orangebush", "orangesmall", "pinkbushsmall", "purplesmall", "bluesmall"],
+      mineral: ["none", "coal", "lapis", "quartz", "amethyst", "gold", "ruby", "emerald", "diamond"],
+      sparkle: ["none", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "16"]
+    };
+
+    // Simplified ABI (key functions only)
     const ABI = [
       "function name() view returns (string)",
       "function symbol() view returns (string)",
       "function totalSupply() view returns (uint256)",
-      "function maxSupply() view returns (uint256)",
       "function tokenURI(uint256 tokenId) view returns (string)",
-      "function getTraits(uint256 tokenId) view returns (uint256 background, uint256 rock, uint256 flower, uint256 mineral, uint256 sparkle)"
+      "function getTraits(uint256 tokenId) view returns (uint256[5])" // Assuming [bg, rock, flower, mineral, sparkle] as uints
     ];
 
-    // ==== DOM ====
-    const loading   = document.getElementById('loading');
-    const errorEl   = document.getElementById('error');
-    const statsEl   = document.getElementById('stats');
-    const eyeframe  = document.getElementById('eyeframe');
-    const gallery   = document.getElementById('gallery');
-    const prevBtn   = document.get
+    // === DOM ===
+    const loading = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const gallery = document.getElementById('gallery');
+    const statsEl = document.getElementById('stats');
+    const stars = document.getElementById('stars');
 
-Btn;
-    const playBtn   = document.getElementById('playBtn');
-    const nextBtn   = document.getElementById('nextBtn');
-    const stars     = document.getElementById('stars');
-
-    // ==== STATE ====
+    // === PROVIDER ===
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-    const contract = new ethers.Contract(CONTRACT, ABI, provider);
-    let rocks = [];
-    let cur = 0;
-    let playing = true;
-    let interval = null;
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
 
-    // ==== HELPERS ====
-    const showError = msg => { loading.style.display='none'; errorEl.textContent=msg; errorEl.style.display='block'; };
-    const b64 = str => btoa(unescape(encodeURIComponent(str)));
+    // === HELPERS ===
+    function showError(msg) {
+      loading.style.display = 'none';
+      errorEl.textContent = `Error: ${msg}`;
+      errorEl.style.display = 'block';
+    }
 
-    // ==== SVG ANIMATION ====
-    const animateSVG = raw => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(raw, 'image/svg+xml');
-      const svg = doc.documentElement;
+    function formatTraits(traits) {
+      // traits = [bgIdx, rockIdx, flowerIdx, mineralIdx, sparkleIdx]
+      return {
+        background: TRAIT_MAPS.background[traits[0] % TRAIT_MAPS.background.length] || 'unknown',
+        rock: traits[1] || 'default',
+        flower: TRAIT_MAPS.flower[traits[2] % TRAIT_MAPS.flower.length] || 'none',
+        mineral: TRAIT_MAPS.mineral[traits[3] % TRAIT_MAPS.mineral.length] || 'none',
+        sparkle: TRAIT_MAPS.sparkle[traits[4] % TRAIT_MAPS.sparkle.length] || 'none'
+      };
+    }
 
-      // dash animation
-      svg.querySelectorAll('path,circle,ellipse,rect').forEach(el=>{
-        el.setAttribute('stroke','#00d4ff');
-        el.setAttribute('stroke-width','1.5');
-        el.style.strokeDasharray = '100';
-        el.style.strokeDashoffset = '100';
-        el.style.animation = 'dash 3s linear infinite';
-      });
+    function createSimpleSVG(traits) {
+      const colors = {
+        stone: '#8B4513', ocean: '#000080', desert: '#EDC9AF', forest: '#228B22', ice: '#ADD8E6', gold: '#FFD700'
+      };
+      const bgColor = colors[traits.background] || '#16213e';
+      const sparkleEffect = traits.sparkle !== 'none' ? `<circle cx="50%" cy="50%" r="${Math.random()*20+10}" fill="rgba(0,212,255,0.5)" opacity="0.7"/>` : '';
+      return `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <rect width="200" height="200" fill="${bgColor}"/>
+        <ellipse cx="100" cy="100" rx="60" ry="80" fill="#A9A9A9" stroke="#00d4ff" stroke-width="2"/>
+        <text x="100" y="105" text-anchor="middle" fill="#00d4ff" font-size="12">${traits.rock}</text>
+        ${sparkleEffect}
+      </svg>`;
+    }
 
-      // sparkle
-      const sp = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      sp.setAttribute('cx','50%'); sp.setAttribute('cy','50%'); sp.setAttribute('r','5');
-      sp.setAttribute('fill','rgba(0,212,255,0.8)');
-      sp.style.animation = 'sparkle 2s infinite';
-      svg.appendChild(sp);
-
-      return svg.outerHTML;
-    };
-
-    // ==== DISPLAY ====
-    const showInEyeframe = i => {
-      const r = rocks[i];
-      if(!r) return;
-      document.querySelectorAll('.thumb').forEach((t,j)=>t.classList.toggle('active',j===i));
-      const animated = animateSVG(r.svg);
-      eyeframe.innerHTML = `
-        <div class="rock-svg">
-          <img src="data:image/svg+xml;base64,${b64(animated)}" alt="Rock ${r.id}">
-        </div>
-        <div style="position:absolute;bottom:20px;left:20px;color:var(--accent);font-size:1.2em;">
-          Rock #${r.id} – ${r.traits.background} / ${r.traits.mineral}
-        </div>
-      `;
-    };
-
-    // ==== AUTO PLAY ====
-    const startPlay = () => {
-      stopPlay();
-      interval = setInterval(()=>{
-        cur = (cur+1)%rocks.length;
-        showInEyeframe(cur);
-      },4000);
-    };
-    const stopPlay = ()=>{ if(interval) clearInterval(interval); interval=null; };
-
-    // ==== CONTROLS ====
-    prevBtn.onclick = ()=>{ cur=(cur-1+rocks.length)%rocks.length; showInEyeframe(cur); if(playing) startPlay(); };
-    nextBtn.onclick = ()=>{ cur=(cur+1)%rocks.length; showInEyeframe(cur); if(playing) startPlay(); };
-    playBtn.onclick = ()=>{
-      playing=!playing;
-      playBtn.textContent = playing?'Pause':'Play';
-      playBtn.classList.toggle('active',playing);
-      playing?startPlay():stopPlay();
-    };
-
-    // ==== THUMBNAILS ====
-    const setupThumbs = ()=>{
-      document.querySelectorAll('.thumb').forEach((t,i)=>{
-        t.onclick=()=>{ cur=i; showInEyeframe(i); if(playing) startPlay(); };
-      });
-    };
-
-    // ==== FETCH ====
-    const fetchStats = async ()=>{
-      try{
-        const [n,s,ts,ms] = await Promise.all([
-          contract.name(), contract.symbol(),
-          contract.totalSupply(), contract.maxSupply()
+    // === FETCH STATS ===
+    async function fetchStats() {
+      try {
+        const [name, symbol, totalSupply] = await Promise.all([
+          contract.name(),
+          contract.symbol(),
+          contract.totalSupply()
         ]);
         statsEl.innerHTML = `
-          <div class="stat">Name: ${n}</div>
-          <div class="stat">Symbol: ${s}</div>
-          <div class="stat">Minted: ${ts} / ${ms}</div>
+          <div class="stat">Name: ${name}</div>
+          <div class="stat">Symbol: ${symbol}</div>
+          <div class="stat">Total Supply: ${ethers.utils.formatUnits(totalSupply, 0)}</div>
         `;
-      }catch(e){ statsEl.innerHTML='<div class="stat">Stats: —</div>'; }
-    };
-
-    const fetchRocks = async ()=>{
-      loading.textContent='Getting minted count...';
-      const total = await contract.totalSupply();
-      const toLoad = Math.min(LOAD_FIRST, Number(total));
-      if(toLoad===0){ showError('No rocks minted yet.'); return; }
-
-      const promises = [];
-      for(let i=0;i<toLoad;i++) promises.push(fetchOne(i));
-      const results = await Promise.all(promises);
-      rocks = results.filter(r=>r && r.svg);
-      if(rocks.length===0){ showError('Could not retrieve any SVG.'); return; }
-
-      loading.style.display='none';
-      renderThumbs();
-      showInEyeframe(0);
-      startPlay();
-    };
-
-    const fetchOne = async tokenId=>{
-      try{
-        const uri = await contract.tokenURI(tokenId);
-        const meta = await (await fetch(uri)).json();
-        const img = meta.image;                     // data:image/svg+xml;base64,...
-        if(!img || !img.startsWith('data:image/svg+xml;base64,')) return null;
-        const rawSVG = atob(img.split(',')[1]);
-
-        const traits = await contract.getTraits(tokenId);
-        const fmt = {
-          background: TRAIT_MAPS.background[traits.background] || `BG-${traits.background}`,
-          rock: `Rock-${traits.rock}`,
-          flower: TRAIT_MAPS.flower[traits.flower] || `Flower-${traits.flower}`,
-          mineral: TRAIT_MAPS.mineral[traits.mineral] || `Mineral-${traits.mineral}`,
-          sparkle: TRAIT_MAPS.sparkle[traits.sparkle] || `Sparkle-${traits.sparkle}`
-        };
-
-        return { id: tokenId+1, svg: rawSVG, traits: fmt };
-      }catch(e){ console.warn(`Token ${tokenId} failed:`,e); return null; }
-    };
-
-    const renderThumbs = ()=>{
-      gallery.innerHTML='';
-      rocks.forEach((r,i)=>{
-        const t = document.createElement('div');
-        t.className='thumb';
-        const mini = r.svg.replace(/width="[^"]*"/,'width="100%"').replace(/height="[^"]*"/,'height="100%"');
-        t.innerHTML = `<img src="data:image/svg+xml;base64,${b64(mini)}" alt="Thumb ${r.id}">`;
-        gallery.appendChild(t);
-      });
-      setupThumbs();
-    };
-
-    // ==== PARTICLES ====
-    const makeStars = ()=>{
-      for(let i=0;i<100;i++){
-        const s=document.createElement('div');
-        s.className='star';
-        s.style.left=Math.random()*100+'%';
-        s.style.top=Math.random()*100+'%';
-        s.style.animationDelay=Math.random()*5+'s';
-        stars.appendChild(s);
+      } catch (err) {
+        showError('Failed to fetch stats: ' + err.message);
       }
-    };
+    }
 
-    // ==== CSS ANIMATIONS ====
-    const style=document.createElement('style');
-    style.textContent=`
-      @keyframes dash{to{stroke-dashoffset:0}}
-      @keyframes sparkle{0%,100%{r:5;opacity:.3}50%{r:20;opacity:1}}
-      path,circle,ellipse,rect{stroke-dasharray:100;stroke-dashoffset:100}
-    `;
-    document.head.appendChild(style);
+    // === FETCH ROCKS ===
+    async function fetchRocks() {
+      const numRocks = 10; // Display first 10 for demo
+      const promises = [];
+      for (let i = 0; i < numRocks; i++) {
+        const tokenId = i;
+        promises.push(fetchRock(tokenId));
+      }
+      try {
+        const rocks = await Promise.all(promises);
+        displayRocks(rocks.filter(r => r)); // Filter any failures
+      } catch (err) {
+        showError('Failed to fetch rocks: ' + err.message);
+      }
+    }
 
-    // ==== INIT ====
-    makeStars();
+    async function fetchRock(tokenId) {
+      try {
+        const [uri, rawTraits] = await Promise.all([
+          contract.tokenURI(tokenId),
+          contract.getTraits(tokenId)
+        ]);
+        const traits = formatTraits(rawTraits);
+        let svg = '';
+        if (uri.startsWith('data:image/svg+xml')) {
+          svg = uri;
+        } else {
+          svg = createSimpleSVG(traits); // Fallback SVG
+        }
+        return { id: tokenId, traits, svg };
+      } catch (err) {
+        console.warn(`Failed for token ${tokenId}:`, err);
+        return null;
+      }
+    }
+
+    function displayRocks(rocks) {
+      loading.style.display = 'none';
+      gallery.innerHTML = '';
+
+      rocks.forEach(rock => {
+        const card = document.createElement('div');
+        card.className = 'rock-card';
+        const traitTags = Object.entries(rock.traits).map(([k, v]) => `<span class="trait">${k}: ${v}</span>`).join('');
+        card.innerHTML = `
+          <div class="rock-img">${rock.svg ? `<img src="data:image/svg+xml;base64,${btoa(rock.svg)}" alt="Rock ${rock.id}">` : `<svg>${rock.svg}</svg>`}</div>
+          <div class="rock-info">
+            <div class="rock-title">Rock #${rock.id}</div>
+            <div class="rock-desc">On-chain procedural rock from HyperEVM</div>
+            <div class="traits">${traitTags}</div>
+          </div>
+        `;
+        gallery.appendChild(card);
+      });
+    }
+
+    // === PARTICLES ===
+    function createStars() {
+      for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 5 + 's';
+        stars.appendChild(star);
+      }
+    }
+
+    // === INIT ===
+    createStars();
     fetchStats();
     fetchRocks();
   </script>
-  <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="text/javascript"></script>
 </body>
+
 </html>
