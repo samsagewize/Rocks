@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HyperRocks</title>
-  <meta name="description" content="1111 Unique HyperRocks • On Drip.Trade" />
+  <title>HyperRocks - All 1111</title>
+  <meta name="description" content="View all 1111 Unique HyperRocks from the HyperEVM Contract • Infinite Scroll Gallery" />
   <style>
     :root {
       --bg: #0f0f1a;
@@ -61,8 +61,21 @@
     .tagline {
       font-size: 1.3em;
       color: #88aaff;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
+    .search-bar {
+      margin-bottom: 20px;
+      padding: 10px;
+      width: 300px;
+      max-width: 90%;
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      text-align: center;
+    }
+    .search-bar::placeholder { color: #667; }
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -79,6 +92,7 @@
       box-shadow: var(--glow);
       transition: all 0.4s ease;
       background: var(--card);
+      position: relative;
     }
     .rock img {
       width: 100%;
@@ -93,6 +107,28 @@
     }
     .rock:hover img {
       transform: scale(1.15);
+    }
+    .rock::after {
+      content: attr(data-id);
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      font-size: 0.8em;
+      color: var(--accent);
+      text-shadow: 0 0 5px rgba(0, 212, 255, 0.8);
+    }
+    .loading-more {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 20px;
+      color: var(--accent);
+      font-size: 1.1em;
+      opacity: 0.7;
+    }
+    .progress {
+      margin: 20px 0;
+      font-size: 1em;
+      color: #88aaff;
     }
     .contract-link {
       color: var(--accent);
@@ -111,6 +147,7 @@
     @media (max-width: 600px) {
       .gallery { grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 15px; }
       h1 { font-size: 2.8em; }
+      .search-bar { width: 90%; }
     }
   </style>
 </head>
@@ -118,18 +155,22 @@
 
   <div class="particle-bg" id="stars"></div>
 
-  <div class="logo">Rock</div>
+  <div class="logo">🪨</div>
   <h1>HyperRocks</h1>
-  <p class="tagline">1111 Unique HyperRocks • Live on Drip.Trade</p>
+  <p class="tagline">All 1111 Unique from HyperEVM Contract</p>
 
-  <!-- GALLERY OF HYPERROCKS -->
+  <input type="text" class="search-bar" id="search" placeholder="Search by Token ID (e.g., 420)" />
+
+  <!-- GALLERY OF ALL HYPERROCKS -->
   <div class="gallery" id="gallery"></div>
+  <div class="loading-more" id="loading-more" style="display: none;">Loading more rocks...</div>
+  <div class="progress" id="progress">Loaded 0/1111</div>
 
   <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">
     View Contract on HyperEVMScan
   </a>
 
-  <footer>HyperRocks • Supply 1111 • Built on HyperEVM</footer>
+  <footer>HyperRocks • Supply 1111 • Procedural SVGs on Drip.Trade</footer>
 
   <script>
     // Twinkling background stars
@@ -143,37 +184,108 @@
       starsContainer.appendChild(star);
     }
 
-    // Load some featured + random HyperRocks
+    // Gallery config
+    const TOTAL = 1111;
+    const BATCH_SIZE = 50;
+    let loadedIds = new Set();
+    let currentBatchStart = 1;
+    let allLoaded = false;
     const gallery = document.getElementById('gallery');
-    const featured = [1, 69, 420, 777, 999, 1111]; // always show these
-    const total = 1111;
-    const extra = 30; // total rocks shown = featured + extra random
+    const loadingMore = document.getElementById('loading-more');
+    const progress = document.getElementById('progress');
+    const searchInput = document.getElementById('search');
 
-    // Add featured first
-    featured.forEach(id => addRock(id));
-
-    // Add random ones (no duplicates)
-    const used = new Set(featured);
-    while (used.size < featured.length + extra) {
-      const randomId = Math.floor(Math.random() * total) + 1;
-      if (!used.has(randomId)) {
-        used.add(randomId);
-        addRock(randomId);
-      }
-    }
-
+    // Add a rock to gallery
     function addRock(id) {
+      if (loadedIds.has(id)) return;
+      loadedIds.add(id);
+
       const div = document.createElement('div');
       div.className = 'rock';
+      div.dataset.id = id;
 
       const img = document.createElement('img');
       img.src = `https://drip.trade/token/hyperrocks/${id}.svg`;
       img.alt = `HyperRock #${id}`;
       img.loading = "lazy";
+      img.onerror = () => { console.warn(`Failed to load #${id}`); }; // Graceful fail
 
       div.appendChild(img);
       gallery.appendChild(div);
+
+      updateProgress();
     }
+
+    // Update progress
+    function updateProgress() {
+      progress.textContent = `Loaded ${loadedIds.size}/${TOTAL}`;
+    }
+
+    // Load a batch (sequential IDs for full collection scan)
+    function loadBatch() {
+      if (allLoaded) return;
+      loadingMore.style.display = 'block';
+
+      const end = Math.min(currentBatchStart + BATCH_SIZE - 1, TOTAL);
+      for (let id = currentBatchStart; id <= end; id++) {
+        addRock(id);
+      }
+
+      currentBatchStart = end + 1;
+      if (currentBatchStart > TOTAL) {
+        allLoaded = true;
+        loadingMore.style.display = 'none';
+        progress.textContent += ' • Complete!';
+      } else {
+        loadingMore.style.display = 'none';
+      }
+    }
+
+    // Initial load: Featured + some random
+    const featured = [1, 69, 420, 777, 999, 1111];
+    featured.forEach(id => addRock(id));
+    // Add first batch to kick off
+    loadBatch();
+
+    // Infinite scroll observer
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !allLoaded) {
+        setTimeout(loadBatch, 100); // Slight delay for smoothness
+      }
+    }, { threshold: 1 });
+
+    observer.observe(loadingMore);
+
+    // Search functionality (filter + jump)
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = e.target.value.trim();
+        if (!query) return;
+
+        const id = parseInt(query);
+        if (id >= 1 && id <= TOTAL && !loadedIds.has(id)) {
+          // Jump load this one + neighbors for context
+          for (let offset = -2; offset <= 2; offset++) {
+            const neighbor = id + offset;
+            if (neighbor >= 1 && neighbor <= TOTAL) {
+              addRock(neighbor);
+            }
+          }
+          // Scroll to it
+          setTimeout(() => {
+            const rock = document.querySelector(`[data-id="${id}"]`);
+            if (rock) rock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 500);
+        }
+      }, 300);
+    });
+
+    // Handle resize for mobile
+    window.addEventListener('resize', () => {
+      // Re-init observer if needed
+    });
   </script>
 </body>
 </html>
