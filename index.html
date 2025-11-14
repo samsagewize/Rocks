@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HyperRocks - All 1111</title>
-  <meta name="description" content="View all 1111 Unique HyperRocks from the HyperEVM Contract • Infinite Scroll Gallery" />
+  <title>HyperRocks - Floating Galaxy</title>
+  <meta name="description" content="1111 Unique HyperRocks Floating in HyperSpace • No Borders, Pure SVGs" />
   <style>
     :root {
       --bg: #0f0f1a;
-      --card: #1a1a2e;
       --accent: #00d4ff;
       --text: #e0e0ff;
       --glow: 0 0 25px rgba(0, 212, 255, 0.6);
@@ -19,10 +18,8 @@
       color: var(--text);
       font-family: 'Courier New', monospace;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       overflow-x: hidden;
+      position: relative;
     }
     .particle-bg {
       position: fixed;
@@ -47,6 +44,8 @@
       margin: 30px auto;
       filter: drop-shadow(0 0 20px var(--accent));
       animation: float 6s infinite ease-in-out;
+      display: block;
+      text-align: center;
     }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
@@ -57,77 +56,97 @@
       color: var(--accent);
       text-shadow: var(--glow);
       margin: 10px 0;
+      text-align: center;
     }
     .tagline {
       font-size: 1.3em;
       color: #88aaff;
       margin-bottom: 20px;
+      text-align: center;
     }
     .search-bar {
       margin-bottom: 20px;
       padding: 10px;
       width: 300px;
       max-width: 90%;
-      background: var(--card);
+      background: rgba(26, 26, 46, 0.8);
       border: 1px solid var(--accent);
       border-radius: 10px;
       color: var(--text);
       font-family: inherit;
       text-align: center;
+      display: block;
+      margin: 20px auto;
     }
     .search-bar::placeholder { color: #667; }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 30px;
-      padding: 20px;
-      max-width: 1400px;
+    .container {
+      position: relative;
       width: 100%;
+      min-height: 100vh;
+      perspective: 1000px; /* 3D space for floating */
     }
     .rock {
-      aspect-ratio: 1;
-      overflow: hidden;
-      border: 2px solid var(--accent);
-      border-radius: 20px;
-      box-shadow: var(--glow);
-      transition: all 0.4s ease;
-      background: var(--card);
-      position: relative;
+      position: absolute;
+      width: 150px; /* Smaller for floating crowd */
+      height: 150px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateY(0deg) translateZ(0px);
+      transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      background: transparent;
+      /* NO BORDERS! Pure floating */
+      filter: drop-shadow(var(--glow));
+      opacity: 0;
+      animation: fadeInFloat 1s forwards;
+      cursor: pointer;
     }
     .rock img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 10px;
-      transition: transform 0.4s ease;
+      border-radius: 50%; /* Soft rock edges */
+      transition: transform 0.6s ease;
     }
     .rock:hover {
-      transform: translateY(-12px);
-      box-shadow: 0 0 50px rgba(0, 212, 255, 0.9);
+      transform: translate(-50%, -50%) rotateY(360deg) translateZ(50px) translateY(-30px) scale(1.2);
+      filter: drop-shadow(0 0 50px rgba(0, 212, 255, 0.9));
+      z-index: 10;
     }
     .rock:hover img {
-      transform: scale(1.15);
+      transform: rotate(10deg);
     }
     .rock::after {
       content: attr(data-id);
       position: absolute;
-      bottom: 8px;
-      right: 8px;
-      font-size: 0.8em;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7em;
       color: var(--accent);
       text-shadow: 0 0 5px rgba(0, 212, 255, 0.8);
-      z-index: 1;
+      pointer-events: none;
+    }
+    @keyframes fadeInFloat {
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotateY(0deg) translateZ(0px);
+      }
     }
     .loading-more {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 20px;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       color: var(--accent);
       font-size: 1.1em;
       opacity: 0.7;
+      display: none;
     }
     .progress {
-      margin: 20px 0;
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 1em;
       color: #88aaff;
     }
@@ -138,15 +157,24 @@
       margin: 40px 0 20px;
       display: inline-block;
       text-shadow: var(--glow);
+      text-align: center;
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
     }
     .contract-link:hover { text-shadow: 0 0 35px rgba(0, 212, 255, 1); }
     footer {
-      margin: 40px 0 20px;
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 0.9em;
       color: #667;
+      text-align: center;
     }
     @media (max-width: 600px) {
-      .gallery { grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 15px; }
+      .rock { width: 120px; height: 120px; }
       h1 { font-size: 2.8em; }
       .search-bar { width: 90%; }
     }
@@ -158,25 +186,24 @@
 
   <div class="logo">🪨</div>
   <h1>HyperRocks</h1>
-  <p class="tagline">All 1111 Unique from HyperEVM Contract</p>
+  <p class="tagline">1111 Unique SVGs Floating in HyperSpace</p>
 
-  <input type="text" class="search-bar" id="search" placeholder="Search by Token ID (e.g., 420)" />
+  <input type="text" class="search-bar" id="search" placeholder="Search & Float to Token ID (e.g., 420)" />
 
-  <!-- GALLERY OF ALL HYPERROCKS -->
-  <div class="gallery" id="gallery"></div>
-  <div class="loading-more" id="loading-more" style="display: none;">Loading more rocks...</div>
+  <div class="container" id="container"></div>
+  <div class="loading-more" id="loading-more">Loading more into the void...</div>
   <div class="progress" id="progress">Loaded 0/1111</div>
 
   <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">
     View Contract on HyperEVMScan
   </a>
 
-  <footer>HyperRocks • Supply 1111 • Procedural SVGs on Drip.Trade</footer>
+  <footer>HyperRocks • Procedural Galaxy • On Drip.Trade</footer>
 
   <script>
-    // Twinkling background stars
+    // Twinkling stars
     const starsContainer = document.getElementById('stars');
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 150; i++) {
       const star = document.createElement('div');
       star.className = 'star';
       star.style.left = Math.random() * 100 + '%';
@@ -185,19 +212,34 @@
       starsContainer.appendChild(star);
     }
 
-    // Gallery config
+    // Config
     const CONTRACT = '0x4cf79252ea6861c4338284e1a1f724d4e7ef667b';
     const TOTAL = 1111;
     const BATCH_SIZE = 50;
     let loadedIds = new Set();
     let currentBatchStart = 1;
     let allLoaded = false;
-    const gallery = document.getElementById('gallery');
+    const container = document.getElementById('container');
     const loadingMore = document.getElementById('loading-more');
     const progress = document.getElementById('progress');
     const searchInput = document.getElementById('search');
 
-    // Add a rock to gallery
+    // Position rocks in "air" (random scatter, staggered for flow)
+    let rockIndex = 0;
+    function getFloatPosition() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const staggerX = (rockIndex % 10) * (vw / 10); // Row stagger
+      const staggerY = Math.floor(rockIndex / 10) * 200; // Vertical flow
+      rockIndex++;
+      return {
+        top: 100 + staggerY + (Math.random() - 0.5) * 100 + '%', // Float Y
+        left: staggerX + (Math.random() - 0.5) * 200 + 'px', // Float X
+        transform: `translate(-50%, -50%) rotateY(${Math.random() * 360}deg) translateZ(${Math.random() * 100 - 50}px)`
+      };
+    }
+
+    // Add floating rock
     function addRock(id) {
       if (loadedIds.has(id)) return;
       loadedIds.add(id);
@@ -205,29 +247,30 @@
       const div = document.createElement('div');
       div.className = 'rock';
       div.dataset.id = id;
+      Object.assign(div.style, getFloatPosition());
 
       const img = document.createElement('img');
       img.src = `https://drip.trade/a/${CONTRACT}/${id}/image.svg`;
       img.alt = `HyperRock #${id}`;
       img.loading = "lazy";
       img.onerror = () => { 
-        console.warn(`Failed to load #${id}`); 
-        // Fallback: Try original pattern as backup
-        img.src = `https://drip.trade/token/hyperrocks/${id}.svg`;
+        console.warn(`SVG fail for #${id} — trying PNG`);
+        img.src = `https://drip.trade/a/${CONTRACT}/${id}/image.png`;
+        // Ultimate fallback
+        setTimeout(() => { if (img.src.includes('error')) img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwZDRmZiIgb3BhY2l0eT0iMC4xIi8+PC9zdmc+'; }, 1000);
       };
+      img.onload = () => { div.style.opacity = '1'; };
 
       div.appendChild(img);
-      gallery.appendChild(div);
+      container.appendChild(div);
 
       updateProgress();
     }
 
-    // Update progress
     function updateProgress() {
       progress.textContent = `Loaded ${loadedIds.size}/${TOTAL}`;
     }
 
-    // Load a batch (sequential IDs for full collection scan)
     function loadBatch() {
       if (allLoaded) return;
       loadingMore.style.display = 'block';
@@ -241,28 +284,25 @@
       if (currentBatchStart > TOTAL) {
         allLoaded = true;
         loadingMore.style.display = 'none';
-        progress.textContent += ' • Complete!';
+        progress.textContent += ' • Galaxy Complete!';
       } else {
         loadingMore.style.display = 'none';
       }
     }
 
-    // Initial load: Featured + some random
+    // Initial featured floaters
     const featured = [1, 69, 420, 777, 999, 1111];
     featured.forEach(id => addRock(id));
-    // Add first batch to kick off
     loadBatch();
 
-    // Infinite scroll observer
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !allLoaded) {
-        setTimeout(loadBatch, 100); // Slight delay for smoothness
+    // Scroll to load more (triggers float-ins)
+    window.addEventListener('scroll', () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !allLoaded) {
+        loadBatch();
       }
-    }, { threshold: 1 });
+    });
 
-    observer.observe(loadingMore);
-
-    // Search functionality (filter + jump)
+    // Search: Float to specific rock
     let searchTimeout;
     searchInput.addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
@@ -272,25 +312,22 @@
 
         const id = parseInt(query);
         if (id >= 1 && id <= TOTAL && !loadedIds.has(id)) {
-          // Jump load this one + neighbors for context
-          for (let offset = -2; offset <= 2; offset++) {
+          // Load it + neighbors
+          for (let offset = -5; offset <= 5; offset++) {
             const neighbor = id + offset;
-            if (neighbor >= 1 && neighbor <= TOTAL) {
-              addRock(neighbor);
-            }
+            if (neighbor >= 1 && neighbor <= TOTAL) addRock(neighbor);
           }
-          // Scroll to it
+          // Float & highlight
           setTimeout(() => {
             const rock = document.querySelector(`[data-id="${id}"]`);
-            if (rock) rock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 500);
+            if (rock) {
+              rock.scrollIntoView({ behavior: 'smooth' });
+              rock.style.filter = 'drop-shadow(0 0 100px #00d4ff)';
+              setTimeout(() => { rock.style.filter = 'drop-shadow(var(--glow))'; }, 3000);
+            }
+          }, 800);
         }
       }, 300);
-    });
-
-    // Handle resize for mobile
-    window.addEventListener('resize', () => {
-      // Re-init observer if needed
     });
   </script>
 </body>
