@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HyperRocks</title>
+  <title>HyperRocks Gallery – Animated Eyeframe</title>
   <style>
     :root {
       --bg: #0f0f1a;
@@ -62,84 +62,89 @@
       border-radius: 10px;
       border: 1px solid var(--accent);
     }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
+    .eyeframe {
       width: 100%;
-      max-width: 1300px;
-      padding: 0 20px;
-    }
-    .rock-card {
+      max-width: 1000px;
+      height: 600px;
       background: var(--card);
-      border: 1px solid var(--accent);
-      border-radius: 18px;
+      border: 2px solid var(--accent);
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: var(--glow);
-      transition: all 0.4s ease;
       position: relative;
+      box-shadow: var(--glow);
+      margin: 30px auto;
     }
-    .rock-card:hover {
-      transform: translateY(-12px) scale(1.02);
-      box-shadow: 0 0 40px rgba(0, 212, 255, 0.9);
-    }
-    .rock-img {
+    .eyeframe-canvas {
       width: 100%;
-      height: 300px;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 4.5em;
-      color: var(--accent);
-      text-shadow: 0 0 20px currentColor;
-      position: relative;
-      overflow: hidden;
+      background: radial-gradient(circle at center, #1a1a2e, #0f0f1a);
     }
-    .rock-img svg {
+    .rock-svg {
       width: 80%;
       height: 80%;
-      filter: drop-shadow(0 0 10px currentColor);
+      filter: drop-shadow(0 0 30px var(--accent));
+      animation: pulse 4s infinite ease-in-out;
     }
-    .rock-img::before {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, transparent 70%);
-      transform: translate(-50%, -50%);
-      animation: pulseGlow 4s infinite;
+    @keyframes pulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.05) rotate(2deg); }
     }
-    @keyframes pulseGlow {
-      0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-      50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.3); }
-    }
-    .rock-info {
-      padding: 18px;
-    }
-    .rock-title {
-      font-size: 1.4em;
-      color: var(--accent);
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    .rock-desc {
-      font-size: 0.95em;
-      color: #bbd;
-      line-height: 1.5;
-    }
-    .traits {
+    .controls {
       display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 10px;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
     }
-    .trait {
-      background: rgba(0,212,255,0.2);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.8em;
+    .btn {
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      background: var(--accent);
+      color: #000;
+      box-shadow: var(--glow);
+    }
+    .btn.active {
+      background: var(--accent);
+      color: #000;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      width: 100%;
+      max-width: 1300px;
+      padding: 0 20px;
+      margin-top: 30px;
+    }
+    .thumb {
+      background: var(--card);
       border: 1px solid var(--accent);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s;
+      opacity: 0.7;
+    }
+    .thumb:hover, .thumb.active {
+      opacity: 1;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0,212,255,0.8);
+    }
+    .thumb svg {
+      width: 100%;
+      height: 150px;
+      object-fit: contain;
     }
     .loading {
       color: var(--accent);
@@ -196,29 +201,43 @@
   <div class="particle-bg" id="stars"></div>
 
   <!-- Floating Rock Logo -->
-  <div class="logo">🪨</div>
+  <div class="logo">Rock</div>
 
   <h1>HyperRocks Gallery</h1>
-  <p class="tagline">Procedural rocks from the HyperEVM chain – Live On-Chain Traits & SVG</p>
+  <p class="tagline">Live animated SVGs from HyperEVM – Click to explore</p>
 
   <div class="stats" id="stats"></div>
 
-  <div class="loading" id="loading">Fetching rocks from HyperEVM...</div>
+  <div class="loading" id="loading">Fetching animated rocks...</div>
   <div class="error" id="error" style="display:none;"></div>
 
+  <!-- EYEFROME DISPLAY -->
+  <div class="eyeframe">
+    <div class="eyeframe-canvas" id="eyeframe">
+      <div style="color:var(--accent);font-size:2em;">Select a Rock</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="prevBtn">Previous</button>
+    <button class="btn active" id="playBtn">Play</button>
+    <button class="btn" id="nextBtn">Next</button>
+  </div>
+
+  <!-- THUMBNAIL GALLERY -->
   <div class="gallery" id="gallery"></div>
 
   <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">View Contract on HyperEVMScan</a>
 
-  <footer>HyperRocks • 1111 Unique • On-Chain Generated</footer>
+  <footer>HyperRocks • 1111 Animated • On-Chain SVG</footer>
 
   <script>
     // === CONFIG ===
     const CONTRACT_ADDRESS = "0x4CF79252EA6861c4338284e1A1F724d4e7ef667b";
-    const RPC_URL = "https://rpc.hyperliquid-testnet.com"; // Adjust for mainnet if needed; use public RPC
-    const CHAIN_ID = 421614; // HyperEVM chain ID (example; confirm)
+    const RPC_URL = "https://rpc.hyperliquid-testnet.com"; // Use mainnet RPC if live
+    const TOTAL_TO_LOAD = 20; // Load first 20 rocks
 
-    // Trait mappings (from contract data)
+    // Trait mappings
     const TRAIT_MAPS = {
       background: ["stone", "ocean", "desert", "forest", "ice", "gold"],
       flower: ["none", "orange", "pinkbushbig", "purple", "blue", "pink", "red", "white", "yellow", "pinkbushmed", "orangebush", "orangesmall", "pinkbushsmall", "purplesmall", "bluesmall"],
@@ -226,13 +245,13 @@
       sparkle: ["none", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "16"]
     };
 
-    // Simplified ABI (key functions only)
+    // Minimal ABI
     const ABI = [
       "function name() view returns (string)",
       "function symbol() view returns (string)",
       "function totalSupply() view returns (uint256)",
       "function tokenURI(uint256 tokenId) view returns (string)",
-      "function getTraits(uint256 tokenId) view returns (uint256[5])" // Assuming [bg, rock, flower, mineral, sparkle] as uints
+      "function getTraits(uint256 tokenId) view returns (uint256[5])"
     ];
 
     // === DOM ===
@@ -240,11 +259,19 @@
     const errorEl = document.getElementById('error');
     const gallery = document.getElementById('gallery');
     const statsEl = document.getElementById('stats');
+    const eyeframe = document.getElementById('eyeframe');
+    const prevBtn = document.getElementById('prevBtn');
+    const playBtn = document.getElementById('playBtn');
+    const nextBtn = document.getElementById('nextBtn');
     const stars = document.getElementById('stars');
 
-    // === PROVIDER ===
+    // === STATE ===
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+    let rocks = [];
+    let currentIndex = 0;
+    let isPlaying = true;
+    let intervalId = null;
 
     // === HELPERS ===
     function showError(msg) {
@@ -254,7 +281,6 @@
     }
 
     function formatTraits(traits) {
-      // traits = [bgIdx, rockIdx, flowerIdx, mineralIdx, sparkleIdx]
       return {
         background: TRAIT_MAPS.background[traits[0] % TRAIT_MAPS.background.length] || 'unknown',
         rock: traits[1] || 'default',
@@ -264,21 +290,106 @@
       };
     }
 
-    function createSimpleSVG(traits) {
-      const colors = {
-        stone: '#8B4513', ocean: '#000080', desert: '#EDC9AF', forest: '#228B22', ice: '#ADD8E6', gold: '#FFD700'
-      };
-      const bgColor = colors[traits.background] || '#16213e';
-      const sparkleEffect = traits.sparkle !== 'none' ? `<circle cx="50%" cy="50%" r="${Math.random()*20+10}" fill="rgba(0,212,255,0.5)" opacity="0.7"/>` : '';
-      return `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <rect width="200" height="200" fill="${bgColor}"/>
-        <ellipse cx="100" cy="100" rx="60" ry="80" fill="#A9A9A9" stroke="#00d4ff" stroke-width="2"/>
-        <text x="100" y="105" text-anchor="middle" fill="#00d4ff" font-size="12">${traits.rock}</text>
-        ${sparkleEffect}
-      </svg>`;
+    function createAnimatedSVG(svgData) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgData, 'image/svg+xml');
+      const svg = doc.documentElement;
+
+      // Add animation to all paths/circles
+      svg.querySelectorAll('path, circle, ellipse, rect').forEach(el => {
+        el.setAttribute('stroke', '#00d4ff');
+        el.setAttribute('stroke-width', '2');
+        el.style.animation = 'dash 3s linear infinite';
+      });
+
+      // Add sparkle animation
+      const sparkle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      sparkle.setAttribute('cx', '50%');
+      sparkle.setAttribute('cy', '50%');
+      sparkle.setAttribute('r', '10');
+      sparkle.setAttribute('fill', 'rgba(0,212,255,0.8)');
+      sparkle.style.animation = 'sparkle 2s infinite';
+      svg.appendChild(sparkle);
+
+      return `<svg>${svg.innerHTML}</svg>`;
     }
 
-    // === FETCH STATS ===
+    // === EYEFROME DISPLAY ===
+    function showInEyeframe(index) {
+      const rock = rocks[index];
+      if (!rock) return;
+
+      // Update thumbnail active state
+      document.querySelectorAll('.thumb').forEach((t, i) => {
+        t.classList.toggle('active', i === index);
+      });
+
+      // Render SVG
+      let svgContent = rock.svg;
+      if (svgContent.includes('<svg')) {
+        svgContent = createAnimatedSVG(svgContent);
+      }
+
+      eyeframe.innerHTML = `
+        <div class="rock-svg">
+          ${svgContent}
+        </div>
+        <div style="position:absolute;bottom:20px;left:20px;color:var(--accent);font-size:1.2em;">
+          Rock #${rock.id} – ${rock.traits.background} ${rock.traits.mineral}
+        </div>
+      `;
+    }
+
+    // === AUTO PLAY ===
+    function startAutoPlay() {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        currentIndex = (currentIndex + 1) % rocks.length;
+        showInEyeframe(currentIndex);
+      }, 4000);
+    }
+
+    function stopAutoPlay() {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = null;
+    }
+
+    // === CONTROLS ===
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + rocks.length) % rocks.length;
+      showInEyeframe(currentIndex);
+      if (isPlaying) startAutoPlay();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % rocks.length;
+      showInEyeframe(currentIndex);
+      if (isPlaying) startAutoPlay();
+    });
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playBtn.textContent = isPlaying ? 'Pause' : 'Play';
+      playBtn.classList.toggle('active', isPlaying);
+      if (isPlaying) {
+        startAutoPlay();
+      } else {
+        stopAutoPlay();
+      }
+    });
+
+    // === THUMBNAIL CLICK ===
+    function setupThumbnails() {
+      document.querySelectorAll('.thumb').forEach((thumb, i) => {
+        thumb.addEventListener('click', () => {
+          currentIndex = i;
+          showInEyeframe(i);
+          if (isPlaying) startAutoPlay();
+        });
+      });
+    }
+
+    // === FETCH & DISPLAY ===
     async function fetchStats() {
       try {
         const [name, symbol, totalSupply] = await Promise.all([
@@ -289,26 +400,28 @@
         statsEl.innerHTML = `
           <div class="stat">Name: ${name}</div>
           <div class="stat">Symbol: ${symbol}</div>
-          <div class="stat">Total Supply: ${ethers.utils.formatUnits(totalSupply, 0)}</div>
+          <div class="stat">Supply: ${ethers.utils.formatUnits(totalSupply, 0)}</div>
         `;
       } catch (err) {
-        showError('Failed to fetch stats: ' + err.message);
+        showError('Stats failed: ' + err.message);
       }
     }
 
-    // === FETCH ROCKS ===
     async function fetchRocks() {
-      const numRocks = 10; // Display first 10 for demo
       const promises = [];
-      for (let i = 0; i < numRocks; i++) {
-        const tokenId = i;
-        promises.push(fetchRock(tokenId));
+      for (let i = 0; i < TOTAL_TO_LOAD; i++) {
+        promises.push(fetchRock(i));
       }
       try {
-        const rocks = await Promise.all(promises);
-        displayRocks(rocks.filter(r => r)); // Filter any failures
+        const results = await Promise.all(promises);
+        rocks = results.filter(r => r);
+        displayThumbnails();
+        if (rocks.length > 0) {
+          showInEyeframe(0);
+          startAutoPlay();
+        }
       } catch (err) {
-        showError('Failed to fetch rocks: ' + err.message);
+        showError('Rocks failed: ' + err.message);
       }
     }
 
@@ -319,42 +432,33 @@
           contract.getTraits(tokenId)
         ]);
         const traits = formatTraits(rawTraits);
-        let svg = '';
-        if (uri.startsWith('data:image/svg+xml')) {
-          svg = uri;
-        } else {
-          svg = createSimpleSVG(traits); // Fallback SVG
-        }
+        let svg = uri.includes('data:image/svg+xml') ? decodeURIComponent(uri.split(',')[1]) : '';
         return { id: tokenId, traits, svg };
       } catch (err) {
-        console.warn(`Failed for token ${tokenId}:`, err);
+        console.warn(`Token ${tokenId} failed:`, err);
         return null;
       }
     }
 
-    function displayRocks(rocks) {
+    function displayThumbnails() {
       loading.style.display = 'none';
       gallery.innerHTML = '';
 
-      rocks.forEach(rock => {
-        const card = document.createElement('div');
-        card.className = 'rock-card';
-        const traitTags = Object.entries(rock.traits).map(([k, v]) => `<span class="trait">${k}: ${v}</span>`).join('');
-        card.innerHTML = `
-          <div class="rock-img">${rock.svg ? `<img src="data:image/svg+xml;base64,${btoa(rock.svg)}" alt="Rock ${rock.id}">` : `<svg>${rock.svg}</svg>`}</div>
-          <div class="rock-info">
-            <div class="rock-title">Rock #${rock.id}</div>
-            <div class="rock-desc">On-chain procedural rock from HyperEVM</div>
-            <div class="traits">${traitTags}</div>
-          </div>
-        `;
-        gallery.appendChild(card);
+      rocks.forEach((rock, i) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        const miniSvg = rock.svg ? rock.svg.replace(/width="[^"]*"/, 'width="100%"').replace(/height="[^"]*"/, 'height="100%"') : 
+          `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#333"/><text x="50" y="55" text-anchor="middle" fill="#00d4ff" font-size="14">Rock #${rock.id}</text></svg>`;
+        thumb.innerHTML = miniSvg;
+        gallery.appendChild(thumb);
       });
+
+      setupThumbnails();
     }
 
     // === PARTICLES ===
     function createStars() {
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 100; i++) {
         const star = document.createElement('div');
         star.className = 'star';
         star.style.left = Math.random() * 100 + '%';
@@ -364,12 +468,25 @@
       }
     }
 
+    // === CSS ANIMATIONS ===
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes dash {
+        to { stroke-dashoffset: 0; }
+      }
+      @keyframes sparkle {
+        0%, 100% { r: 5; opacity: 0.3; }
+        50% { r: 20; opacity: 1; }
+      }
+      path, circle, ellipse { stroke-dasharray: 100; stroke-dashoffset: 100; }
+    `;
+    document.head.appendChild(style);
+
     // === INIT ===
     createStars();
     fetchStats();
     fetchRocks();
   </script>
-  <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="text/javascript"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
 </body>
-
 </html>
