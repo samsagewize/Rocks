@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HyperRocks - Floating Galaxy</title>
-  <meta name="description" content="1111 Unique HyperRocks Floating in HyperSpace • No Borders, Pure SVGs" />
+  <title>HyperRocks - On-Chain Floating Galaxy</title>
+  <meta name="description" content="1111 Unique HyperRocks SVGs Generated Live from Contract • Floating in HyperSpace" />
   <style>
     :root {
       --bg: #0f0f1a;
@@ -186,19 +186,19 @@
 
   <div class="logo">🪨</div>
   <h1>HyperRocks</h1>
-  <p class="tagline">1111 Unique SVGs Floating in HyperSpace</p>
+  <p class="tagline">1111 On-Chain SVGs Floating in HyperSpace</p>
 
   <input type="text" class="search-bar" id="search" placeholder="Search & Float to Token ID (e.g., 420)" />
 
   <div class="container" id="container"></div>
-  <div class="loading-more" id="loading-more">Loading more into the void...</div>
+  <div class="loading-more" id="loading-more">Summoning more rocks from the chain...</div>
   <div class="progress" id="progress">Loaded 0/1111</div>
 
   <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">
     View Contract on HyperEVMScan
   </a>
 
-  <footer>HyperRocks • Procedural Galaxy • On Drip.Trade</footer>
+  <footer>HyperRocks • Generative SVGs via buildSVG • HyperEVM Chain ID 999</footer>
 
   <script>
     // Twinkling stars
@@ -213,7 +213,9 @@
     }
 
     // Config
-    const CONTRACT = '0x4cf79252ea6861c4338284e1a1f724d4e7ef667b';
+    const CONTRACT = '0x4CF79252EA6861c4338284e1A1F724d4e7ef667b';
+    const RPC = 'https://rpc.hyperliquid.xyz/evm';
+    const SELECTOR = '0x54f82ed7'; // keccak256('buildSVG(uint256)')
     const TOTAL = 1111;
     const BATCH_SIZE = 50;
     let loadedIds = new Set();
@@ -224,23 +226,58 @@
     const progress = document.getElementById('progress');
     const searchInput = document.getElementById('search');
 
+    // Hex utils
+    function padHex(num, bytes = 32) {
+      const hex = num.toString(16);
+      return '0x' + '0'.repeat(bytes * 2 - hex.length) + hex;
+    }
+    function hexToUtf8(hex) {
+      if (!hex.startsWith('0x')) hex = '0x' + hex;
+      let str = '';
+      for (let i = 2; i < hex.length; i += 2) {
+        const code = parseInt(hex.substr(i, 2), 16);
+        if (code === 0) break; // Null-terminated string
+        str += String.fromCharCode(code);
+      }
+      return str;
+    }
+
+    // Fetch SVG from contract
+    async function fetchSVG(tokenId) {
+      const data = SELECTOR + padHex(tokenId).slice(2); // Remove 0x for concat
+      const response = await fetch(RPC, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'eth_call',
+          params: [{ to: CONTRACT, data }, 'latest']
+        })
+      });
+      const { result } = await response.json();
+      if (!result) throw new Error('RPC failed');
+      const svg = hexToUtf8(result);
+      return `data:image/svg+xml;base64,${btoa(svg)}`;
+    }
+
     // Position rocks in "air" (random scatter, staggered for flow)
     let rockIndex = 0;
     function getFloatPosition() {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const staggerX = (rockIndex % 10) * (vw / 10); // Row stagger
-      const staggerY = Math.floor(rockIndex / 10) * 200; // Vertical flow
+      const staggerX = (rockIndex % 10) * (vw / 10);
+      const staggerY = Math.floor(rockIndex / 10) * 200;
       rockIndex++;
       return {
-        top: 100 + staggerY + (Math.random() - 0.5) * 100 + '%', // Float Y
-        left: staggerX + (Math.random() - 0.5) * 200 + 'px', // Float X
+        top: 100 + staggerY + (Math.random() - 0.5) * 100 + '%',
+        left: staggerX + (Math.random() - 0.5) * 200 + 'px',
         transform: `translate(-50%, -50%) rotateY(${Math.random() * 360}deg) translateZ(${Math.random() * 100 - 50}px)`
       };
     }
 
-    // Add floating rock
-    function addRock(id) {
+    // Add floating rock (async)
+    async function addRock(id) {
       if (loadedIds.has(id)) return;
       loadedIds.add(id);
 
@@ -249,21 +286,20 @@
       div.dataset.id = id;
       Object.assign(div.style, getFloatPosition());
 
-      const img = document.createElement('img');
-      img.src = `https://drip.trade/a/${CONTRACT}/${id}/image.svg`;
-      img.alt = `HyperRock #${id}`;
-      img.loading = "lazy";
-      img.onerror = () => { 
-        console.warn(`SVG fail for #${id} — trying PNG`);
-        img.src = `https://drip.trade/a/${CONTRACT}/${id}/image.png`;
-        // Ultimate fallback
-        setTimeout(() => { if (img.src.includes('error')) img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwZDRmZiIgb3BhY2l0eT0iMC4xIi8+PC9zdmc+'; }, 1000);
-      };
-      img.onload = () => { div.style.opacity = '1'; };
+      try {
+        const svgSrc = await fetchSVG(id);
+        const img = document.createElement('img');
+        img.src = svgSrc;
+        img.alt = `HyperRock #${id}`;
+        img.loading = "lazy";
+        img.onerror = () => { img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0iIzAwZDRmZiIgb3BhY2l0eT0iMC4xIi8+PC9zdmc+'; }; // Placeholder
+        div.appendChild(img);
+      } catch (e) {
+        console.warn(`Failed to load #${id}: ${e}`);
+        div.innerHTML = '<div style="width:100%;height:100%;background:radial-gradient(circle,#00d4ff,#0f0f1a);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4ff;font-size:12px;">#? Rock</div>';
+      }
 
-      div.appendChild(img);
       container.appendChild(div);
-
       updateProgress();
     }
 
@@ -271,13 +307,13 @@
       progress.textContent = `Loaded ${loadedIds.size}/${TOTAL}`;
     }
 
-    function loadBatch() {
+    async function loadBatch() {
       if (allLoaded) return;
       loadingMore.style.display = 'block';
 
       const end = Math.min(currentBatchStart + BATCH_SIZE - 1, TOTAL);
       for (let id = currentBatchStart; id <= end; id++) {
-        addRock(id);
+        await addRock(id);
       }
 
       currentBatchStart = end + 1;
@@ -295,7 +331,7 @@
     featured.forEach(id => addRock(id));
     loadBatch();
 
-    // Scroll to load more (triggers float-ins)
+    // Scroll to load more
     window.addEventListener('scroll', () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !allLoaded) {
         loadBatch();
@@ -306,7 +342,7 @@
     let searchTimeout;
     searchInput.addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
+      searchTimeout = setTimeout(async () => {
         const query = e.target.value.trim();
         if (!query) return;
 
@@ -315,7 +351,7 @@
           // Load it + neighbors
           for (let offset = -5; offset <= 5; offset++) {
             const neighbor = id + offset;
-            if (neighbor >= 1 && neighbor <= TOTAL) addRock(neighbor);
+            if (neighbor >= 1 && neighbor <= TOTAL) await addRock(neighbor);
           }
           // Float & highlight
           setTimeout(() => {
