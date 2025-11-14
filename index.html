@@ -186,19 +186,19 @@
 
   <div class="logo">🪨</div>
   <h1>HyperRocks</h1>
-  <p class="tagline">1111 On-Chain SVGs Floating in HyperSpace</p>
+  <p class="tagline">1111 On-Chain SVGs via buildSVG • Floating in HyperSpace</p>
 
-  <input type="text" class="search-bar" id="search" placeholder="Search & Float to Token ID (e.g., 420)" />
+  <input type="text" class="search-bar" id="search" placeholder="Search & Summon Token ID (e.g., 420)" />
 
   <div class="container" id="container"></div>
   <div class="loading-more" id="loading-more">Summoning more rocks from the chain...</div>
   <div class="progress" id="progress">Loaded 0/1111</div>
 
-  <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">
-    View Contract on HyperEVMScan
+  <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b#readContract" target="_blank" class="contract-link">
+    Read Contract on HyperEVMScan
   </a>
 
-  <footer>HyperRocks • Generative SVGs via buildSVG • HyperEVM Chain ID 999</footer>
+  <footer>HyperRocks • Live buildSVG Calls • HyperEVM Chain ID 999</footer>
 
   <script>
     // Twinkling stars
@@ -226,7 +226,7 @@
     const progress = document.getElementById('progress');
     const searchInput = document.getElementById('search');
 
-    // Hex utils
+    // Hex utils - FIXED: Full decode, no break on 0x00
     function padHex(num, bytes = 32) {
       const hex = num.toString(16);
       return '0x' + '0'.repeat(bytes * 2 - hex.length) + hex;
@@ -236,15 +236,14 @@
       let str = '';
       for (let i = 2; i < hex.length; i += 2) {
         const code = parseInt(hex.substr(i, 2), 16);
-        if (code === 0) break; // Null-terminated string
         str += String.fromCharCode(code);
       }
       return str;
     }
 
-    // Fetch SVG from contract
+    // Fetch SVG from contract's buildSVG
     async function fetchSVG(tokenId) {
-      const data = SELECTOR + padHex(tokenId).slice(2); // Remove 0x for concat
+      const data = SELECTOR + padHex(tokenId).slice(2); // Full calldata
       const response = await fetch(RPC, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -255,9 +254,11 @@
           params: [{ to: CONTRACT, data }, 'latest']
         })
       });
+      if (!response.ok) throw new Error(`RPC ${response.status}`);
       const { result } = await response.json();
-      if (!result) throw new Error('RPC failed');
+      if (!result || result === '0x') throw new Error('Empty result - token may not exist');
       const svg = hexToUtf8(result);
+      if (!svg.startsWith('<svg')) throw new Error('Invalid SVG');
       return `data:image/svg+xml;base64,${btoa(svg)}`;
     }
 
@@ -270,7 +271,7 @@
       const staggerY = Math.floor(rockIndex / 10) * 200;
       rockIndex++;
       return {
-        top: 100 + staggerY + (Math.random() - 0.5) * 100 + '%',
+        top: 100 + staggerY + (Math.random() - 0.5) * 100 + 'px',
         left: staggerX + (Math.random() - 0.5) * 200 + 'px',
         transform: `translate(-50%, -50%) rotateY(${Math.random() * 360}deg) translateZ(${Math.random() * 100 - 50}px)`
       };
@@ -292,14 +293,23 @@
         img.src = svgSrc;
         img.alt = `HyperRock #${id}`;
         img.loading = "lazy";
-        img.onerror = () => { img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0iIzAwZDRmZiIgb3BhY2l0eT0iMC4xIi8+PC9zdmc+'; }; // Placeholder
+        img.onerror = () => {
+          console.error(`Image load failed for #${id}`);
+          img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0iIzAwZDRmZiIgb3BhY2l0eT0iMC4xIiBzdHJva2U9IiMwMGQ0ZmYiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjgiIGZpbGw9InRyYW5zcGFyZW50IiBzdHJva2U9IiMwMGQ0ZmYiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PC9zdmc+'; // Glowing placeholder rock
+        };
         div.appendChild(img);
       } catch (e) {
-        console.warn(`Failed to load #${id}: ${e}`);
-        div.innerHTML = '<div style="width:100%;height:100%;background:radial-gradient(circle,#00d4ff,#0f0f1a);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#00d4ff;font-size:12px;">#? Rock</div>';
+        console.warn(`buildSVG failed for #${id}: ${e.message}`);
+        // Procedural fallback rock SVG
+        const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="512" height="512" shape-rendering="crispEdges"><rect width="32" height="32" fill="#00d4ff"/><rect x="8" y="8" width="16" height="16" rx="8" fill="#0f0f1a" opacity="0.8"/><circle cx="16" cy="16" r="6" fill="#00d4ff" opacity="0.6"/></svg>`;
+        const img = document.createElement('img');
+        img.src = `data:image/svg+xml;base64,${btoa(fallbackSvg)}`;
+        img.alt = `HyperRock #${id} (Fallback)`;
+        div.appendChild(img);
       }
 
       container.appendChild(div);
+      div.style.opacity = '1'; // Fade in after append
       updateProgress();
     }
 
@@ -313,14 +323,15 @@
 
       const end = Math.min(currentBatchStart + BATCH_SIZE - 1, TOTAL);
       for (let id = currentBatchStart; id <= end; id++) {
-        await addRock(id);
+        await addRock(id); // Sequential to avoid RPC spam
+        await new Promise(resolve => setTimeout(resolve, 50)); // Throttle
       }
 
       currentBatchStart = end + 1;
       if (currentBatchStart > TOTAL) {
         allLoaded = true;
         loadingMore.style.display = 'none';
-        progress.textContent += ' • Galaxy Complete!';
+        progress.textContent += ' • Full Galaxy Assembled!';
       } else {
         loadingMore.style.display = 'none';
       }
@@ -328,8 +339,7 @@
 
     // Initial featured floaters
     const featured = [1, 69, 420, 777, 999, 1111];
-    featured.forEach(id => addRock(id));
-    loadBatch();
+    Promise.all(featured.map(id => addRock(id))).then(() => loadBatch());
 
     // Scroll to load more
     window.addEventListener('scroll', () => {
@@ -338,7 +348,7 @@
       }
     });
 
-    // Search: Float to specific rock
+    // Search: Summon specific rock
     let searchTimeout;
     searchInput.addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
@@ -353,11 +363,11 @@
             const neighbor = id + offset;
             if (neighbor >= 1 && neighbor <= TOTAL) await addRock(neighbor);
           }
-          // Float & highlight
+          // Summon & highlight
           setTimeout(() => {
             const rock = document.querySelector(`[data-id="${id}"]`);
             if (rock) {
-              rock.scrollIntoView({ behavior: 'smooth' });
+              rock.scrollIntoView({ behavior: 'smooth', block: 'center' });
               rock.style.filter = 'drop-shadow(0 0 100px #00d4ff)';
               setTimeout(() => { rock.style.filter = 'drop-shadow(var(--glow))'; }, 3000);
             }
