@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HyperRocks</title>
+  <title>HyperRocks Gallery</title>
   <style>
     :root {
       --bg: #0f0f1a;
+      --card: #1a1a2e;
       --accent: #00d4ff;
       --text: #e0e0ff;
-      --glow: 0 0 15px rgba(0, 212, 255, 0.5);
+      --glow: 0 0 25px rgba(0, 212, 255, 0.6);
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -22,77 +23,126 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-x: auto;
+      justify-content: flex-start;
+      overflow-x: hidden;
     }
     .logo {
-      width: 80px;
-      height: 80px;
-      margin: 15px auto;
-      filter: drop-shadow(0 0 15px var(--accent));
+      width: 100px;
+      height: 100px;
+      margin: 20px auto;
+      filter: drop-shadow(0 0 20px var(--accent));
       animation: float 6s infinite ease-in-out;
     }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      50% { transform: translateY(-15px); }
     }
     h1 {
-      font-size: 2.5em;
+      font-size: 3em;
       color: var(--accent);
       text-shadow: var(--glow);
       margin: 10px 0 5px;
     }
     .tagline {
-      font-size: 1.1em;
+      font-size: 1.2em;
       color: #88aaff;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
     .stats {
       display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 15px;
-      font-size: 1em;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+      font-size: 1.1em;
     }
     .stat {
-      background: #1a1a2e;
-      padding: 8px 16px;
-      border-radius: 8px;
+      background: var(--card);
+      padding: 10px 20px;
+      border-radius: 10px;
       border: 1px solid var(--accent);
     }
-    .grid {
+    .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 64px);
-      gap: 4px;
-      justify-content: center;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
       width: 100%;
-      max-width: 1200px;
-      padding: 10px;
+      max-width: 1300px;
+      padding: 0 20px;
     }
-    .rock {
-      width: 64px;
-      height: 64px;
+    .rock-card {
+      background: var(--card);
       border: 1px solid var(--accent);
-      border-radius: 6px;
+      border-radius: 18px;
       overflow: hidden;
       box-shadow: var(--glow);
-      transition: all 0.3s ease;
-      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
     }
-    .rock:hover {
-      transform: scale(1.15);
-      box-shadow: 0 0 25px rgba(0, 212, 255, 0.9);
-      z-index: 10;
+    .rock-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.9);
     }
-    .rock img {
+    .rock-img {
       width: 100%;
-      height: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .rock-img img {
+      width: 80%;
+      height: 80%;
       object-fit: contain;
-      image-rendering: pixelated;
+      filter: drop-shadow(0 0 10px #00d4ff);
+    }
+    .rock-img::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      animation: pulseGlow 4s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.3); }
+    }
+    .rock-info {
+      padding: 18px;
+    }
+    .rock-title {
+      font-size: 1.4em;
+      color: var(--accent);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .rock-desc {
+      font-size: 0.95em;
+      color: #bbd;
+      line-height: 1.5;
+    }
+    .traits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .trait {
+      background: rgba(0,212,255,0.2);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      border: 1px solid var(--accent);
     }
     .loading {
       color: var(--accent);
-      font-size: 1.2em;
-      margin: 30px 0;
+      font-size: 1.3em;
+      margin: 40px 0;
       animation: blink 1.5s infinite;
     }
     @keyframes blink {
@@ -105,8 +155,8 @@
       margin: 20px;
     }
     footer {
-      margin-top: 40px;
-      font-size: 0.8em;
+      margin-top: 50px;
+      font-size: 0.85em;
       color: #667;
     }
     .particle-bg {
@@ -131,7 +181,7 @@
       color: var(--accent);
       text-decoration: none;
       font-size: 0.9em;
-      margin: 15px;
+      margin-top: 20px;
       display: inline-block;
     }
     .contract-link:hover {
@@ -143,19 +193,20 @@
 
   <div class="particle-bg" id="stars"></div>
 
-  <div class="logo">🪨</div>
+  <!-- Floating Rock Logo -->
+  <div class="logo">Rock</div>
 
   <h1>HyperRocks Gallery</h1>
-  <p class="tagline">All 1111 Rocks – Tiny & On-Chain</p>
+  <p class="tagline">All 1111 Rocks – Live from HyperEVM</p>
 
   <div class="stats" id="stats">
     <div class="stat">Loading...</div>
   </div>
 
-  <div class="loading" id="loading">Fetching all 1111 rocks...</div>
+  <div class="loading" id="loading">Fetching rocks from HyperEVM...</div>
   <div class="error" id="error" style="display:none;"></div>
 
-  <div class="grid" id="grid"></div>
+  <div class="gallery" id="gallery"></div>
 
   <a href="https://hyperevmscan.io/address/0x4CF79252EA6861c4338284e1A1F724d4e7ef667b" target="_blank" class="contract-link">
     View Contract on HyperEVMScan
@@ -163,13 +214,13 @@
 
   <footer>HyperRocks • 1111 Unique • On-Chain SVG</footer>
 
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
   <script>
     // === CONFIG ===
-    const CONTRACT_ADDRESS = "0x4cf79252ea6861c4338284e1a1f724d4e7ef667b";
+    const CONTRACT_ADDRESS = "0x4CF79252EA6861c4338284e1A1F724d4e7ef667b";
     const RPC_URL = "https://rpc.hyperliquid.xyz/evm"; // MAINNET
     const MAX_SUPPLY = 1111;
 
-    // ABI for read functions
     const ABI = [
       "function totalSupply() view returns (uint256)",
       "function tokenURI(uint256 tokenId) view returns (string)"
@@ -178,11 +229,11 @@
     // === DOM ===
     const loading = document.getElementById('loading');
     const errorEl = document.getElementById('error');
-    const grid = document.getElementById('grid');
+    const gallery = document.getElementById('gallery');
     const statsEl = document.getElementById('stats');
     const stars = document.getElementById('stars');
 
-    // === PROVIDER ===
+    // === PROVIDER & CONTRACT ===
     let provider, contract;
 
     function init() {
@@ -201,7 +252,7 @@
       return btoa(unescape(encodeURIComponent(svg)));
     }
 
-    // === FETCH ALL 1111 ===
+    // === FETCH ALL ROCKS ===
     async function loadAllRocks() {
       try {
         const total = await contract.totalSupply();
@@ -209,17 +260,17 @@
         statsEl.innerHTML = `<div class="stat">Minted: ${minted} / ${MAX_SUPPLY}</div>`;
 
         if (minted === 0) {
-          showError('No rocks minted yet.');
+          showError('No rocks minted yet. Mint some first!');
           return;
         }
 
         let loaded = 0;
-        for (let id = 0; id < MAX_SUPPLY; id++) {
+        for (let id = 0; id < minted; id++) { // Only up to minted count
           const rock = await fetchRock(id);
           if (rock) {
             renderRock(rock);
             loaded++;
-            statsEl.innerHTML = `<div class="stat">Loaded: ${loaded} / ${MAX_SUPPLY}</div>`;
+            statsEl.innerHTML = `<div class="stat">Loaded: ${loaded} / ${minted}</div>`;
           }
         }
 
@@ -245,12 +296,19 @@
     }
 
     function renderRock(rock) {
-      const div = document.createElement('div');
-      div.className = 'rock';
-      div.title = `Rock #${rock.id}`;
+      const card = document.createElement('div');
+      card.className = 'rock-card';
       const mini = rock.svg.replace(/width="[^"]*"/, 'width="100%"').replace(/height="[^"]*"/, 'height="100%"');
-      div.innerHTML = `<img src="data:image/svg+xml;base64,${b64(mini)}" alt="Rock ${rock.id}">`;
-      grid.appendChild(div);
+      card.innerHTML = `
+        <div class="rock-img">
+          <img src="data:image/svg+xml;base64,${b64(mini)}" alt="Rock ${rock.id}">
+        </div>
+        <div class="rock-info">
+          <div class="rock-title">Rock #${rock.id}</div>
+          <div class="rock-desc">On-chain SVG from HyperEVM</div>
+        </div>
+      `;
+      gallery.appendChild(card);
     }
 
     // === PARTICLES ===
@@ -270,7 +328,5 @@
     init();
     loadAllRocks();
   </script>
-  <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
 </body>
 </html>
-
