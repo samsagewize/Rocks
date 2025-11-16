@@ -44,16 +44,56 @@
     const RPC = 'https://rpc.hyperliquid.xyz/evm';
     const SELECTOR = '0x54f82ed7'; // keccak256('buildSVG(uint256)')
     const TOTAL = 1111;
-    const BATCH_SIZE = 50;
-    let loadedIds = new Set();
-    let currentBatchStart = 1;
-    let allLoaded = false;
-    const container = document.getElementById('container');
-    const loadingMore = document.getElementById('loading-more');
-    const progress = document.getElementById('progress');
-    const searchInput = document.getElementById('search');
 
-    // Hex utils - FIXED: Full decode, no break on 0x00
+    // Container for dynamic loader
+    const dynamicContainerId = 'dynamic-rock-viewer';
+    let dynamicViewer = document.getElementById(dynamicContainerId);
+    if (!dynamicViewer) {
+      dynamicViewer = document.createElement('div');
+      dynamicViewer.id = dynamicContainerId;
+      dynamicViewer.style.position = "relative";
+      dynamicViewer.style.margin = "30px auto";
+      dynamicViewer.style.width = "520px";
+      dynamicViewer.style.maxWidth = "95vw";
+      dynamicViewer.style.display = "flex";
+      dynamicViewer.style.flexDirection = "column";
+      dynamicViewer.style.alignItems = "center";
+      dynamicViewer.style.background = "rgba(10,20,40,0.85)";
+      dynamicViewer.style.borderRadius = "24px";
+      dynamicViewer.style.boxShadow = "0 0 40px #00d4ff33";
+      dynamicViewer.style.padding = "36px 0 18px 0";
+      dynamicViewer.style.zIndex = 10;
+      // Insert before the floating rocks galaxy
+      const container = document.getElementById('container');
+      container.parentNode.insertBefore(dynamicViewer, container);
+    }
+
+    // Inject buttons & image root
+    dynamicViewer.innerHTML = `
+      <div style="display:flex; justify-content:center; gap:40px;">
+        <button id="viewer-left" style="font-size:2rem; padding: 8px 18px; border-radius:10px; border:none; background:#101f4a; color:#00d4ff; cursor:pointer;">&#9664; Left</button>
+        <div id="viewer-img-div" style="display:flex; flex-direction:column; align-items:center;">
+          <div id="viewer-loading" style="font-size:1.1rem; color:#00d4ff; margin-bottom:12px; display:none;">Summoning rock...</div>
+          <img id="viewer-img" src="" alt="HyperRock" style="box-shadow: 0 0 50px #00d4ff80; border-radius:16px; width:420px; max-width:90vw; min-height:210px; background:#101f32;" />
+          <div id="viewer-fallback" style="color:#fff; opacity:0.8; margin-top:10px; display:none;">Fallback galaxy SVG</div>
+        </div>
+        <button id="viewer-right" style="font-size:2rem; padding: 8px 18px; border-radius:10px; border:none; background:#101f4a; color:#00d4ff; cursor:pointer;">Right &#9654;</button>
+      </div>
+      <div id="viewer-desc" style="font-size:1.1rem; color:#00d4ff; margin-top: 14px;">HyperRock #<span id="viewer-id">1</span> / 1111</div>
+      <input type="number" id="viewer-input" min="1" max="${TOTAL}" placeholder="Go to Token ID" style="font-size:1.1rem; border-radius:8px; border:1px solid #00d4ff99; margin-top:14px; width:170px; text-align:center; padding:5px;" />
+    `;
+
+    // Setup references
+    const viewerImg = document.getElementById('viewer-img');
+    const viewerLeft = document.getElementById('viewer-left');
+    const viewerRight = document.getElementById('viewer-right');
+    const viewerDesc = document.getElementById('viewer-desc');
+    const viewerLoading = document.getElementById('viewer-loading');
+    const viewerFallback = document.getElementById('viewer-fallback');
+    const viewerIdSpan = document.getElementById('viewer-id');
+    const viewerInput = document.getElementById('viewer-input');
+
+    // Hex utils
     function padHex(num, bytes = 32) {
       const hex = num.toString(16);
       return '0x' + '0'.repeat(bytes * 2 - hex.length) + hex;
@@ -63,9 +103,17 @@
       let str = '';
       for (let i = 2; i < hex.length; i += 2) {
         const code = parseInt(hex.substr(i, 2), 16);
-        str += String.fromCharCode(code);
+        // Handle null bytes and ensure valid character codes
+        if (code === 0 && str.length > 0) {
+          // Stop at first null byte (common in Solidity string returns)
+          break;
+        }
+        if (code > 0) {
+          str += String.fromCharCode(code);
+        }
       }
-      return str;
+      // Trim any trailing whitespace/null characters
+      return str.trim();
     }
 
     // Fetch SVG from contract's buildSVG
@@ -86,122 +134,126 @@
       if (!result || result === '0x') throw new Error('Empty result - token may not exist');
       const svg = hexToUtf8(result);
       if (!svg.startsWith('<svg')) throw new Error('Invalid SVG');
-      return `data:image/svg+xml;base64,${btoa(svg)}`;
+      // Use URL encoding instead of base64 for better compatibility with special characters
+      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     }
 
-    // Position rocks in "air" (random scatter, staggered for flow)
-    let rockIndex = 0;
-    function getFloatPosition() {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const staggerX = (rockIndex % 10) * (vw / 10);
-      const staggerY = Math.floor(rockIndex / 10) * 200;
-      rockIndex++;
-      return {
-        top: 100 + staggerY + (Math.random() - 0.5) * 100 + 'px',
-        left: staggerX + (Math.random() - 0.5) * 200 + 'px',
-        transform: `translate(-50%, -50%) rotateY(${Math.random() * 360}deg) translateZ(${Math.random() * 100 - 50}px)`
-      };
-    }
-
-    // Add floating rock (async)
-    async function addRock(id) {
-      if (loadedIds.has(id)) return;
-      loadedIds.add(id);
-
-      const div = document.createElement('div');
-      div.className = 'rock';
-      div.dataset.id = id;
-      Object.assign(div.style, getFloatPosition());
-
+    // State
+    let currentId = 1;
+    let loadingId = null; // Track which tokenId we're currently loading
+    async function updateViewer(id) {
+      if (isNaN(id) || id < 1 || id > TOTAL) return;
+      currentId = id;
+      loadingId = id; // Set the loading tokenId
+      viewerIdSpan.textContent = id;
+      viewerDesc.style.color = '#00d4ff';
+      viewerImg.style.filter = "";
+      viewerImg.style.opacity = '0.1';
+      viewerLoading.style.display = 'block';
+      viewerFallback.style.display = 'none';
+      viewerImg.alt = `HyperRock #${id}`;
+      
+      // Clear previous event handlers to prevent them from firing
+      viewerImg.onerror = null;
+      viewerImg.onload = null;
+      
+      // Clear src to cancel any pending loads
+      viewerImg.src = '';
+      
       try {
         const svgSrc = await fetchSVG(id);
-        const img = document.createElement('img');
-        img.src = svgSrc;
-        img.alt = `HyperRock #${id}`;
-        img.loading = "lazy";
-        img.onerror = () => {
-          console.error(`Image load failed for #${id}`);
-          img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0iIzAwZDRmZiIgb3BhY2l0eT0iMC4xIiBzdHJva2U9IiMwMGQ0ZmYiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjgiIGZpbGw9InRyYW5zcGFyZW50IiBzdHJva2U9IiMwMGQ0ZmYiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMiwyIi8+PC9zdmc+'; // Glowing placeholder rock
-        };
-        div.appendChild(img);
-      } catch (e) {
-        console.warn(`buildSVG failed for #${id}: ${e.message}`);
-        // Procedural fallback rock SVG
-        const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="512" height="512" shape-rendering="crispEdges"><rect width="32" height="32" fill="#00d4ff"/><rect x="8" y="8" width="16" height="16" rx="8" fill="#0f0f1a" opacity="0.8"/><circle cx="16" cy="16" r="6" fill="#00d4ff" opacity="0.6"/></svg>`;
-        const img = document.createElement('img');
-        img.src = `data:image/svg+xml;base64,${btoa(fallbackSvg)}`;
-        img.alt = `HyperRock #${id} (Fallback)`;
-        div.appendChild(img);
-      }
-
-      container.appendChild(div);
-      div.style.opacity = '1'; // Fade in after append
-      updateProgress();
-    }
-
-    function updateProgress() {
-      progress.textContent = `Loaded ${loadedIds.size}/${TOTAL}`;
-    }
-
-    async function loadBatch() {
-      if (allLoaded) return;
-      loadingMore.style.display = 'block';
-
-      const end = Math.min(currentBatchStart + BATCH_SIZE - 1, TOTAL);
-      for (let id = currentBatchStart; id <= end; id++) {
-        await addRock(id); // Sequential to avoid RPC spam
-        await new Promise(resolve => setTimeout(resolve, 50)); // Throttle
-      }
-
-      currentBatchStart = end + 1;
-      if (currentBatchStart > TOTAL) {
-        allLoaded = true;
-        loadingMore.style.display = 'none';
-        progress.textContent += ' • Full Galaxy Assembled!';
-      } else {
-        loadingMore.style.display = 'none';
-      }
-    }
-
-    // Initial featured floaters
-    const featured = [1, 69, 420, 777, 999, 1111];
-    Promise.all(featured.map(id => addRock(id))).then(() => loadBatch());
-
-    // Scroll to load more
-    window.addEventListener('scroll', () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !allLoaded) {
-        loadBatch();
-      }
-    });
-
-    // Search: Summon specific rock
-    let searchTimeout;
-    searchInput.addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(async () => {
-        const query = e.target.value.trim();
-        if (!query) return;
-
-        const id = parseInt(query);
-        if (id >= 1 && id <= TOTAL && !loadedIds.has(id)) {
-          // Load it + neighbors
-          for (let offset = -5; offset <= 5; offset++) {
-            const neighbor = id + offset;
-            if (neighbor >= 1 && neighbor <= TOTAL) await addRock(neighbor);
+        
+        // Check if we're still loading the same tokenId (user might have navigated away)
+        if (loadingId !== id) return;
+        
+        // Set error handler BEFORE setting src to avoid race conditions
+        viewerImg.onerror = () => {
+          // Only handle error if this is still the current tokenId
+          if (loadingId === id) {
+            viewerFallback.style.display = 'block';
+            viewerImg.src = fallbackSVGDataUrl;
           }
-          // Summon & highlight
-          setTimeout(() => {
-            const rock = document.querySelector(`[data-id="${id}"]`);
-            if (rock) {
-              rock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              rock.style.filter = 'drop-shadow(0 0 100px #00d4ff)';
-              setTimeout(() => { rock.style.filter = 'drop-shadow(var(--glow))'; }, 3000);
-            }
-          }, 800);
+        };
+        
+        // Set load handler BEFORE setting src
+        viewerImg.onload = function() {
+          // Only handle load if this is still the current tokenId
+          if (loadingId === id) {
+            viewerImg.style.opacity = '1';
+            viewerLoading.style.display = 'none';
+          }
+        };
+        
+        // Now set the src
+        viewerImg.src = svgSrc;
+      } catch (e) {
+        // Only set fallback if we're still loading the same tokenId
+        if (loadingId === id) {
+          viewerFallback.style.display = 'block';
+          viewerImg.src = fallbackSVGDataUrl;
+          viewerDesc.style.color = 'orange';
+          viewerImg.alt = `HyperRock #${id} (Fallback)`;
+          viewerImg.style.opacity = '1';
+          viewerLoading.style.display = 'none';
         }
-      }, 300);
+      }
+      
+      // Fallback timeout - only apply if still loading same tokenId
+      setTimeout(() => {
+        if (loadingId === id) {
+          viewerImg.style.opacity = '1';
+          viewerLoading.style.display = 'none';
+        }
+      }, 700); // just in case image onload fails
+    }
+
+    // Fallback SVG data url
+    const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="512" height="512" shape-rendering="crispEdges"><rect width="32" height="32" fill="#00d4ff"/><rect x="8" y="8" width="16" height="16" rx="8" fill="#0f0f1a" opacity="0.8"/><circle cx="16" cy="16" r="6" fill="#00d4ff" opacity="0.6"/></svg>`;
+    const fallbackSVGDataUrl = `data:image/svg+xml;base64,${btoa(fallbackSvg)}`;
+
+    // Button logic
+    function goLeft() {
+      const next = currentId > 1 ? currentId - 1 : TOTAL;
+      updateViewer(next);
+    }
+    function goRight() {
+      const next = currentId < TOTAL ? currentId + 1 : 1;
+      updateViewer(next);
+    }
+    viewerLeft.addEventListener('click', goLeft);
+    viewerRight.addEventListener('click', goRight);
+
+    // Allow arrow keys navigation
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement === viewerInput) return;
+      if (e.key === 'ArrowLeft') {
+        goLeft();
+        e.preventDefault();
+      }
+      if (e.key === 'ArrowRight') {
+        goRight();
+        e.preventDefault();
+      }
     });
+
+    // Input for jump directly
+    viewerInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const n = Number(viewerInput.value.trim());
+        if (n >= 1 && n <= TOTAL) {
+          updateViewer(n);
+        }
+      }
+    });
+    viewerInput.addEventListener('change', () => {
+      const n = Number(viewerInput.value.trim());
+      if (n >= 1 && n <= TOTAL) {
+        updateViewer(n);
+      }
+    });
+
+    // Initial load
+    updateViewer(currentId);
   </script>
 </body>
 </html>
