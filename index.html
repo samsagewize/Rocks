@@ -57,9 +57,17 @@
     function hexToUtf8(hex) {
       // Remove 0x prefix if present
       if (!hex.startsWith('0x')) hex = '0x' + hex;
+      // Ensure hex string has even length (pad with 0 if odd)
+      if ((hex.length - 2) % 2 !== 0) {
+        hex = hex.slice(0, 2) + '0' + hex.slice(2);
+      }
       const bytes = [];
       for (let i = 2; i < hex.length; i += 2) {
-        const byte = parseInt(hex.substr(i,2), 16);
+        const byte = parseInt(hex.substr(i, 2), 16);
+        if (isNaN(byte)) {
+          console.warn(`Invalid hex byte at position ${i}: ${hex.substr(i, 2)}`);
+          continue;
+        }
         bytes.push(byte);
       }
       // Find first 0 byte, indicating possible end of utf-8 string
@@ -67,7 +75,10 @@
       if (end === -1) end = bytes.length;
       // Correct: check for empty string
       if (end === 0) return "";
-      return new TextDecoder('utf-8').decode(new Uint8Array(bytes.slice(0, end))).trim();
+      const decoder = new TextDecoder('utf-8');
+      const decoded = decoder.decode(new Uint8Array(bytes.slice(0, end))).trim();
+      console.log(`Decoded string length: ${decoded.length}, starts with: ${decoded.substring(0, 20)}...`);
+      return decoded;
     }
 
     async function fetchSVG(tokenId) {
@@ -79,7 +90,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             jsonrpc: '2.0',
-            id: 1,
+            id: tokenId,
             method: 'eth_call',
             params: [{ to: CONTRACT, data }, 'latest']
           })
@@ -94,6 +105,11 @@
         // Defensive: log raw returned JSON
         console.log("eth_call result", json);
 
+        // Check for JSON-RPC error response
+        if (json.error) {
+          throw new Error(`RPC error: ${json.error.message || JSON.stringify(json.error)}`);
+        }
+
         if (!json || typeof json.result !== "string" || json.result === '0x') {
           throw new Error('No result from eth_call');
         }
@@ -102,10 +118,12 @@
 
         // If SVG is clearly invalid, throw error
         if (typeof svg !== "string" || !svg.trim().startsWith('<svg')) {
+          // if (typeof svg !== "string" ) {
           console.log(`Invalid SVG: ${svg}`);
+          
           throw new Error('Invalid SVG');
         }
-        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        return `data:image/svg+xml;charset=utf-8,${svg}`;
       } catch (err) {
         // Log to help diagnose
         console.error("Error in fetchSVG:", err);
@@ -160,6 +178,7 @@
       viewerError.style.display = 'none';
       try {
         const imgSrc = await fetchSVG(id);
+        console.log(`ImgSrc: ${imgSrc}`);
         viewerImg.src = imgSrc;
         viewerImg.alt = `HyperRock #${id}`;
         viewerError.style.display = 'none';
